@@ -9,12 +9,15 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -73,6 +76,9 @@ fun IMCScreen(name: String, modifier: Modifier = Modifier) {
     }
     var resultado by remember{
         mutableStateOf("")
+    }
+    var classificacao by remember {
+        mutableStateOf("Insira um peso")
     }
 
     Column(
@@ -180,19 +186,25 @@ fun IMCScreen(name: String, modifier: Modifier = Modifier) {
 
                         Button(
                             onClick = {
-                                val alturaDouble = altura.toInt() / 100.0
-                                val calculo = peso.toInt() / (alturaDouble * alturaDouble)
+                                val alturaDouble = altura.toDoubleOrNull()
+                                val pesoDouble = peso.toDoubleOrNull()
 
-                                val classificacao = when {
-                                    calculo < 18.5 -> "Abaixo do peso"
-                                    calculo < 25 -> "Peso ideal"
-                                    calculo < 30 -> "Levemente acima do peso"
-                                    calculo < 35 -> "Obesidade grau I"
-                                    calculo < 40 -> "Obesidade grau II"
-                                    else -> "Obesidade grau III"
+                                if (alturaDouble != null && pesoDouble != null && alturaDouble > 0) {
+                                    val alturaMetros = alturaDouble / 100.0
+                                    val calculo = pesoDouble / (alturaMetros * alturaMetros)
+
+                                    classificacao = when {
+                                        calculo < 18.5 -> "Abaixo do peso"
+                                        calculo < 25 -> "Peso ideal"
+                                        calculo < 30 -> "Levemente acima do peso"
+                                        calculo < 35 -> "Obesidade grau I"
+                                        calculo < 40 -> "Obesidade grau II"
+                                        else -> "Obesidade grau III"
+                                    }
+                                    resultado = "%.2f".format(calculo)
+                                } else {
+                                    classificacao = "Preencha altura e peso"
                                 }
-
-                                resultado = "%.1f  %s".format(calculo, classificacao)
                             },
                             modifier = Modifier.fillMaxWidth(),
                             colors = ButtonDefaults.buttonColors(
@@ -211,14 +223,37 @@ fun IMCScreen(name: String, modifier: Modifier = Modifier) {
                 }
 
                 Card(
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text(
-                        text = resultado,
-                        modifier = Modifier.padding(16.dp),
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.Bold
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 32.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = Color(0xFF329F68)
                     )
+                ){
+                    Row(
+                        modifier = Modifier.fillMaxWidth()
+                            .padding(16.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(
+                            text = resultado,
+                            color = Color.White,
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+
+                        Spacer(modifier = Modifier.width(16.dp))
+
+                        Text(
+                            text = classificacao,
+                            modifier = Modifier.padding(16.dp),
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+
+                    }
+
                 }
 
             }
